@@ -9,11 +9,15 @@ contract ZombieFactory is Ownable {
 
     uint dnaDigits = 16;
     uint dnaModulus = 10 ** dnaDigits;
+    uint cooldownTime = 1 days;
 
     // this is a constructor of a Zombie object
     struct Zombie {
         string name;
         uint dna;
+        // packing the two data types together saves computation time and storage space
+        uint32 level;
+        uint32 readyTime;
     }
 
     Zombie[] public zombies;
@@ -26,7 +30,7 @@ contract ZombieFactory is Ownable {
     // internal functions are functions that can be called by objects that inherit from this contract
     function _createZombie(string memory _name, uint _dna) internal {
         // Array.push() returns the length of the array after inserting value
-        uint id = zombies.push(Zombie(_name, _dna)) - 1;
+        uint id = zombies.push(Zombie(_name, _dna, 1, uint32(now + cooldownTime))) - 1;
         // msg.sender gives the address of the owner of the contract
         zombieToOwner[id] = msg.sender;
         ownerZombieCount[msg.sender]++;

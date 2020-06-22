@@ -41,11 +41,12 @@ contract ZombieFeeding is ZombieFactory {
         return (_zombie.readyTime <= now);
     }
 
-    function feedAndMultiply(uint _zombieId, uint _targetDna, string _species) public {
+    function feedAndMultiply(uint _zombieId, uint _targetDna, string _species) internal {
         // make sure the owner is the same as the zombie owner
         require(msg.sender == zombieToOwner[_zombieId]);
         // put into the blockchain memory
         Zombie storage myZombie = zombies[_zombieId];
+        require(_isReady(myZombie));
         // limit the DNA strand to 16 digits
         _targetDna = _targetDna % dnaModulus;
         // get the average of the dna of the zombie and newly infected
@@ -56,6 +57,7 @@ contract ZombieFeeding is ZombieFactory {
           newDna = newDna - newDna % 100 + 99;
         }
         _createZombie("NoName", newDna);
+        _triggerCooldown(myZombie);
   }
 
   function feedOnKitty(uint _zombieId, uint _kittyId) public {
